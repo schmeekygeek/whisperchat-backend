@@ -5,10 +5,10 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
+	"github.com/labstack/echo/v4"
 )
 
 type Server struct {
@@ -16,44 +16,22 @@ type Server struct {
   rooms       map[string]Room
 }
 
-func (s *Server) Serve(w http.ResponseWriter, r *http.Request) {
-
-  lat, err := strconv.ParseFloat(r.URL.Query().Get("lat"), 64)
-  if err != nil {
-    w.Write([]byte("Can't parse value for latitude"))
-    // w.WriteHeader(400)
-    // TODO: take distance preference from query
-    return
-  }
-  long, err := strconv.ParseFloat(r.URL.Query().Get("long"), 64)
-  if err != nil {
-    w.Write([]byte("Can't parse value for longitude"))
-    w.WriteHeader(400)
-    return
-  }
-  location := Location{
-  	lat:  lat,
-  	long: long,
-  }
-
-  conn, _, _, err := ws.UpgradeHTTP(r, w)
-
+func (s *Server) Serve(c echo.Context) error {
+  // take post body
+  conn, _, _, err := ws.UpgradeHTTP(c.Request(), c.Response())
+  client := new(Client)
   if err != nil {
     log.Println(err.Error())
-    return
+    return err
   }
   
   log.Println(conn.RemoteAddr().String(), "connected successfully")
-
-  client := Client{
-  	room:      "",
-  	conn:      conn,
-  	location:  location,
-  	isMatched: true,
-  }
-  s.clients[conn.RemoteAddr().String()] = client
+  if err = c.Bind(client); err != nil {
+    return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+  } 
+  s.clients[conn.RemoteAddr().String()] = *client
   if (!(len(s.clients) > 1)) {
-    return
+    return nil
   }
   fmt.Println(s.clients)
   carr := []Client{}
@@ -80,7 +58,9 @@ func (s *Server) Serve(w http.ResponseWriter, r *http.Request) {
     if err != nil {
       if err == io.EOF {
         log.Println(client.conn.RemoteAddr().String(), "disconnected")
-        
+        wsutil.WriteServerMessage(
+          "User ",
+        )
       }
     }
   }

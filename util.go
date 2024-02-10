@@ -19,10 +19,10 @@ func RandSeq(n int) string {
 
 func CalculateDistance(point1 Location, point2 Location) float64 {
   const R = 6371 //Radius of the earth in km
-  dLat := deg2rad(float64(point1.lat) - float64(point2.lat))
-  dLong := deg2rad(float64(point1.long) - float64(point2.long))
+  dLat := deg2rad(float64(point1.Lat) - float64(point2.Lat))
+  dLong := deg2rad(float64(point1.Long) - float64(point2.Long))
   a := math.Sin(dLat / 2) * math.Sin(dLat / 2) + math.Cos(
-    deg2rad(float64(point1.lat)) * math.Cos(deg2rad(float64(point2.lat))),
+    deg2rad(float64(point1.Lat)) * math.Cos(deg2rad(float64(point2.Lat))),
   ) * math.Sin(dLong / 2) * math.Sin(dLong / 2)
   c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1 - a))
   d := R * c;

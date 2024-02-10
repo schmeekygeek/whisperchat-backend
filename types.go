@@ -3,8 +3,8 @@ package main
 import "net"
 
 type Location struct {
-  lat float64
-  long float64
+  Lat float64   `json:"lat"`
+  Long float64   `json:"long"`
 }
 
 type Room struct {
@@ -19,9 +19,10 @@ type Message struct {
 }
 
 type Client struct {
-  username  string
-  room      string
+  Username  string    `json:"username"`
+  Location  Location  `json:"location"`
+  Range     int       `json:"range"` // in kms
   conn      net.Conn
-  location  Location
+  room      string
   isMatched bool
 }
