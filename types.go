@@ -19,6 +19,7 @@ type Message struct {
 }
 
 type Client struct {
+  username  string
   room      string
   conn      net.Conn
   location  Location

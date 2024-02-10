@@ -1,12 +1,29 @@
 package main
 
-import "math"
+import (
+	"math"
+	"math/rand"
+	"time"
+)
+
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+
+func RandSeq(n int) string {
+  r := rand.New(rand.NewSource(time.Now().UnixNano()))
+  b := make([]rune, n)
+  for i := range b {
+    b[i] = letters[r.Intn(len(letters))]
+  }
+  return string(b)
+}
 
 func CalculateDistance(point1 Location, point2 Location) float64 {
   const R = 6371 //Radius of the earth in km
   dLat := deg2rad(float64(point1.lat) - float64(point2.lat))
   dLong := deg2rad(float64(point1.long) - float64(point2.long))
-  a := math.Sin(dLat / 2) * math.Sin(dLat / 2) + math.Cos(deg2rad(float64(point1.lat)) * math.Cos(deg2rad(float64(point2.lat)))) * math.Sin(dLong / 2) * math.Sin(dLong / 2)
+  a := math.Sin(dLat / 2) * math.Sin(dLat / 2) + math.Cos(
+    deg2rad(float64(point1.lat)) * math.Cos(deg2rad(float64(point2.lat))),
+  ) * math.Sin(dLong / 2) * math.Sin(dLong / 2)
   c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1 - a))
   d := R * c;
   return d
