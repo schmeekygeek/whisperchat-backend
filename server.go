@@ -60,6 +60,7 @@ func (s *Server) Serve(c echo.Context) error {
   for {
     msg, _, err := wsutil.ReadClientData(conn)
     fmt.Println(string(msg))
+    fmt.Println(client)
     if err != nil {
       if err == io.EOF {
         log.Println(conn.RemoteAddr().String(), "disconnected")
