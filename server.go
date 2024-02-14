@@ -73,3 +73,20 @@ func (s *Server) Serve(c echo.Context) error {
     }
   }
 }
+
+func isServerMessage(msg string) bool {
+  if !(len(msg) > 4) {
+    return false
+  } else if msg[0:4] == "msg:" {
+      return true
+    }
+  return false
+}
+
+func parseClientMessage(msg string) {
+
+}
+
+func parseServerMessage(msg string) {
+
+}
