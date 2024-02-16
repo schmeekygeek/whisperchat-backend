@@ -65,5 +65,4 @@ func parseServerMessage(msg []byte, cl *Client, c echo.Context) {
 }
 
 // TODO: matchmaking algorithm (match top two)
-// TODO: bind client body after successfully upgrading
 // TODO: remove connection from pool, inform other client and delete room
