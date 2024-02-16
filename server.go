@@ -34,59 +34,37 @@ func (s *Server) Serve(c echo.Context) error {
   if err = c.Bind(client); err != nil {
     return echo.NewHTTPError(http.StatusBadRequest, err.Error())
   } 
-  // s.clients[conn.RemoteAddr().String()] = *client
-  // if (!(len(s.clients) > 1)) {
-  //   return nil
-  // }
-  // fmt.Println(s.clients)
-  // carr := []Client{}
-  // for _, val := range s.clients {
-  //   carr = append(carr, val)
-  // }
-  // roomId := RandSeq(5)
-  // carr[0].room = roomId
-  // carr[1].room = roomId
-  // room := Room{
-  // 	c1:       carr[0],
-  // 	c2:       carr[1],
-  // 	messages: []Message{},
-  // }
-  // s.rooms[roomId] = room
-  // delete(s.clients, room.c1.conn.RemoteAddr().String())
-  // fmt.Println(s.rooms)
-  // fmt.Println(s.clients)
-  // TODO: add matchmaking algorithm
-
   for {
     msg, _, err := wsutil.ReadClientData(conn)
-    fmt.Println(string(msg))
-    fmt.Println(client)
     if err != nil {
       if err == io.EOF {
         log.Println(conn.RemoteAddr().String(), "disconnected")
-        wsutil.WriteServerMessage(
-          conn,
-          1,
-          []byte("hi"),
-        )
+        return nil
       }
+      log.Println(err.Error())
+    }
+    if isServerMessage(string(msg)) {
+      fmt.Println("hi")
+      parseServerMessage(string(msg))
+    } else {
+      sendClientMessage(string(msg), client.room)
     }
   }
 }
 
 func isServerMessage(msg string) bool {
-  if !(len(msg) > 4) {
-    return false
-  } else if msg[0:4] == "msg:" {
-      return true
-    }
-  return false
+  return len(msg) > 4 && msg[0:4] == "msg:"
 }
 
-func parseClientMessage(msg string) {
+func sendClientMessage(msg string, room string) {
 
 }
 
 func parseServerMessage(msg string) {
-
+  message := msg[4:len(msg)]
+  fmt.Println("server message", message, "received")
 }
+
+// TODO: matchmaking algorithm (match top two)
+// TODO: bind client body after successfully upgrading
+// TODO: remove connection from pool, inform other client and delete room
