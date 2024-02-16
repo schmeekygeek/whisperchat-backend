@@ -1,9 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
 	"log"
-	"net/http"
 	"strings"
 
 	"github.com/gobwas/ws"
@@ -36,7 +36,7 @@ func (s *Server) Serve(c echo.Context) error {
       log.Println(err.Error())
     }
     if isServerMessage(string(msg)) {
-      parseServerMessage(string(msg))
+      parseServerMessage(msg, client, c)
     } else {
       sendClientMessage(string(msg), client.room)
     }
@@ -51,13 +51,17 @@ func sendClientMessage(msg string, room string) {
 
 }
 
-func parseServerMessage(msg string) {
-  message := msg[4:len(msg)]
-  if strings.HasPrefix(message, "BIND") {
+func parseServerMessage(msg []byte, cl *Client, c echo.Context) {
+  message := msg[4:len(string(msg))]
+  if strings.HasPrefix(string(message), "BIND") {
     bodyToParse := message[5:]
     log.Println("Got body to parse:", bodyToParse)
+    err := json.Unmarshal(bodyToParse, cl)
+    if err != nil {
+      log.Println(err.Error())
+    }
+    log.Println(cl.Username)
   }
-  log.Println("Received message", message)
 }
 
 // TODO: matchmaking algorithm (match top two)
