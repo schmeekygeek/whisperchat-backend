@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
@@ -18,22 +18,14 @@ type Server struct {
 
 func (s *Server) Serve(c echo.Context) error {
 
-  client := new(Client)
-  fmt.Println("")
-  if err := c.Bind(client); err != nil {
-    return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-  }
-
   conn, _, _, err := ws.UpgradeHTTP(c.Request(), c.Response())
   if err != nil {
     log.Println(err.Error())
     return err
   }
-  
   log.Println(conn.RemoteAddr().String(), "connected successfully")
-  if err = c.Bind(client); err != nil {
-    return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-  } 
+
+  client := new(Client)
   for {
     msg, _, err := wsutil.ReadClientData(conn)
     if err != nil {
@@ -44,7 +36,6 @@ func (s *Server) Serve(c echo.Context) error {
       log.Println(err.Error())
     }
     if isServerMessage(string(msg)) {
-      fmt.Println("hi")
       parseServerMessage(string(msg))
     } else {
       sendClientMessage(string(msg), client.room)
@@ -53,7 +44,7 @@ func (s *Server) Serve(c echo.Context) error {
 }
 
 func isServerMessage(msg string) bool {
-  return len(msg) > 4 && msg[0:4] == "msg:"
+  return strings.HasPrefix(msg, "msg:")
 }
 
 func sendClientMessage(msg string, room string) {
@@ -62,7 +53,11 @@ func sendClientMessage(msg string, room string) {
 
 func parseServerMessage(msg string) {
   message := msg[4:len(msg)]
-  fmt.Println("server message", message, "received")
+  if strings.HasPrefix(message, "BIND") {
+    bodyToParse := message[5:]
+    log.Println("Got body to parse:", bodyToParse)
+  }
+  log.Println("Received message", message)
 }
 
 // TODO: matchmaking algorithm (match top two)
