@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
   e := echo.New()
   s := Server{
-  	clients: map[string]Client{},
+  	clients: []Client{},
   	rooms:   map[string]Room{},
   }
   e.Use(middleware.Logger())
