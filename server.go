@@ -41,9 +41,9 @@ func (s *Server) Serve(c echo.Context) error {
           log.Println("here tit is #2", room.c2.conn)
           var otherClient Client
           if room.c1.conn == nil {
-            otherClient = room.c1
-          } else {
             otherClient = room.c2
+          } else {
+            otherClient = room.c1
           }
           log.Println(otherClient.conn)
           wsutil.WriteServerMessage(
@@ -70,6 +70,7 @@ func (s *Server) Serve(c echo.Context) error {
         log.Println("is he matcheeeeed????", client.isMatched)
       }
     } else {
+      log.Println(client)
       sendClientMessage(string(msg), client.room, *client)
     }
   }
