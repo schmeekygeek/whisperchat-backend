@@ -125,3 +125,12 @@ func (s *Server) broadcastMessage(roomId string, message string) {
 }
 
 // TODO: remove connection from pool, inform other client and delete room
+
+// TODO #2
+// 1. take connection, upgrade
+// 2. bind first message to client
+// 3. put clients in a separate room to wait for a match
+// 4. match top two after two clients connect
+// 5. inform client that match was made
+// 6. normal communication
+// 7. upon EOF, check if match was made, if yes remove from pool #1, or remove from pool #2 and inform other client
