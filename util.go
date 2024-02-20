@@ -1,9 +1,14 @@
 package main
 
 import (
+	"encoding/json"
+	"log"
 	"math"
 	"math/rand"
+	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
 )
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
@@ -31,4 +36,17 @@ func CalculateDistance(point1 Location, point2 Location) float64 {
 
 func deg2rad(deg float64) float64 {
   return deg * (math.Pi / 180)
+}
+
+func (s *Server) parseServerMessage(msg []byte, cl *Client, c echo.Context) {
+  message := msg[4:len(string(msg))]
+  if strings.HasPrefix(string(message), "BIND") {
+    bodyToParse := message[5:]
+    log.Println("Got body to parse:", string(bodyToParse))
+    err := json.Unmarshal(bodyToParse, cl)
+    if err != nil {
+      log.Println(err.Error())
+    }
+    s.clients = append(s.clients, *cl)
+  }
 }

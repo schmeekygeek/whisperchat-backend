@@ -13,5 +13,6 @@ func main() {
   }
   e.Use(middleware.Logger())
   e.GET("/", s.Serve)
+  e.GET("/test", Test)
   e.Logger.Fatal(e.Start(":8080"))
 }
