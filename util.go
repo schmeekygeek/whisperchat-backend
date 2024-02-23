@@ -5,10 +5,9 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"net"
 	"strings"
 	"time"
-
-	"github.com/labstack/echo/v4"
 )
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
@@ -38,7 +37,7 @@ func deg2rad(deg float64) float64 {
   return deg * (math.Pi / 180)
 }
 
-func (s *Server) parseServerMessage(msg []byte, cl *Client, c echo.Context) {
+func (s *Server) parseServerMessage(msg []byte, cl *Client, conn *net.Conn) {
   message := msg[4:len(string(msg))]
   if strings.HasPrefix(string(message), "BIND") {
     bodyToParse := message[5:]
@@ -47,6 +46,20 @@ func (s *Server) parseServerMessage(msg []byte, cl *Client, c echo.Context) {
     if err != nil {
       log.Println(err.Error())
     }
-    s.clients = append(s.clients, *cl)
+    s.clients[conn] = cl
+  }
+}
+
+func (s *Server) match() {
+  for k, v := range s.clients {
+    for k2, v2 := range s.clients {
+      if k == k2 {
+        continue
+      }
+      distance := CalculateDistance(v.Location, v2.Location)
+      if distance <= float64(v.Range) && distance <= float64(v2.Range) {
+        // match dem
+      }
+    }
   }
 }

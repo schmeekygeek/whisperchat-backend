@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -8,11 +10,10 @@ import (
 func main() {
   e := echo.New()
   s := Server{
-  	clients: []Client{},
+  	clients: map[*net.Conn]*Client{},
   	rooms:   map[string]Room{},
   }
   e.Use(middleware.Logger())
   e.GET("/", s.Serve)
-  e.GET("/test", Test)
   e.Logger.Fatal(e.Start(":8080"))
 }

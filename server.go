@@ -1,7 +1,9 @@
 package main
 
 import (
+	"io"
 	"log"
+	"net"
 	"strings"
 
 	"github.com/gobwas/ws"
@@ -10,18 +12,44 @@ import (
 )
 
 type Server struct {
-  clients     []Client
+  clients     map[*net.Conn]*Client
   rooms       map[string]Room
 }
 
 func (s *Server) Serve(c echo.Context) error {
 
-  _, _, _, err := ws.UpgradeHTTP(c.Request(), c.Response())
+  conn, _, _, err := ws.UpgradeHTTP(c.Request(), c.Response())
   if err != nil {
     log.Println(err.Error())
     return err
   }
-  return nil
+  log.Println(conn.RemoteAddr().String(), "connected")
+  client := new(Client)
+  for {
+    msg, _, err := wsutil.ReadClientData(conn)
+    if err != nil {
+      log.Println(err)
+      if err == io.EOF {
+        // inform other client if matched
+        return nil
+      }
+    }
+    if string(msg) == "hi" {
+      // debug
+      log.Println("\nRooms:", s.rooms)
+      log.Println("___________")
+      log.Println("Clients:")
+      for k, v := range s.clients {
+        log.Println(k, v)
+      }
+      log.Println("___________")
+    } else if isServerMessage(string(msg)) {
+      s.parseServerMessage(msg, client, &conn)
+      if len(s.clients) > 1 {
+        s.match()
+      }
+    }
+  }
 }
 
 func Test(c echo.Context) error {
@@ -50,7 +78,7 @@ func isServerMessage(msg string) bool {
 }
 
 func (s *Server) broadcastMessage(roomId string, message string) {
-  // TODO: inform client abotu match made
+  // TODO: inform client about match made
 }
 
 // TODO: remove connection from pool, inform other client and delete room

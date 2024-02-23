@@ -24,5 +24,5 @@ type Client struct {
   Range     int       `json:"range"` // in kms
   conn      net.Conn
   room      string
-  isMatched bool
+  // isMatched bool
 }
