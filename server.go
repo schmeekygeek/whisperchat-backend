@@ -91,3 +91,4 @@ func (s *Server) broadcastMessage(roomId string, message string) {
 // 5. inform client that match was made
 // 6. normal communication
 // 7. upon EOF, check if match was made, if yes remove from pool #1, or remove from pool #2 and inform other client
+// inform client about match made and other client disconnected
