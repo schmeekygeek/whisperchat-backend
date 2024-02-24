@@ -50,7 +50,7 @@ func (s *Server) parseServerMessage(msg []byte, cl *Client, conn *net.Conn) {
   }
 }
 
-func (s *Server) match() {
+func (s *Server) match() error {
   for k, v := range s.clients {
     for k2, v2 := range s.clients {
       if k == k2 {
@@ -59,7 +59,22 @@ func (s *Server) match() {
       distance := CalculateDistance(v.Location, v2.Location)
       if distance <= float64(v.Range) && distance <= float64(v2.Range) {
         // match dem
+        room := new(Room)
+        roomId := RandSeq(5)
+        c1 := s.clients[k]
+        c1.room = roomId
+        room.c1 = *c1
+
+        c2 := s.clients[k2]
+        c2.room = roomId
+        room.c2 = *c2
+        s.rooms[roomId] = *room
+
+        delete(s.clients, k)
+        delete(s.clients, k2)
+        return nil
       }
     }
   }
+  return nil
 }
