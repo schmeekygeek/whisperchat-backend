@@ -26,3 +26,7 @@ type Client struct {
   room      string
   // isMatched bool
 }
+
+const (
+  MATCHEDMSG = "msg:MATCHED"
+)

@@ -8,6 +8,8 @@ import (
 	"net"
 	"strings"
 	"time"
+
+	"github.com/gobwas/ws/wsutil"
 )
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
@@ -62,14 +64,17 @@ func (s *Server) match() error {
         room := new(Room)
         roomId := RandSeq(5)
         c1 := s.clients[k]
+        c1.conn = *k
         c1.room = roomId
         room.c1 = *c1
 
         c2 := s.clients[k2]
+        c2.conn = *k2
         c2.room = roomId
         room.c2 = *c2
         s.rooms[roomId] = *room
 
+        s.broadcastMessage(roomId, MATCHEDMSG)
         delete(s.clients, k)
         delete(s.clients, k2)
         return nil
@@ -77,4 +82,18 @@ func (s *Server) match() error {
     }
   }
   return nil
+}
+
+func (s *Server) broadcastMessage(roomId string, message string) {
+  room := s.rooms[roomId]
+  wsutil.WriteServerMessage(
+    room.c1.conn,
+    1,
+    []byte(message),
+  )
+  wsutil.WriteServerMessage(
+    room.c2.conn,
+    1,
+    []byte(message),
+  )
 }

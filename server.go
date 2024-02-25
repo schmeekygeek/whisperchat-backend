@@ -48,6 +48,8 @@ func (s *Server) Serve(c echo.Context) error {
       if len(s.clients) > 1 {
         s.match()
       }
+    } else {
+      s.broadcastMessage(client.room, string(msg))
     }
   }
 }
@@ -55,7 +57,6 @@ func (s *Server) Serve(c echo.Context) error {
 func Test(c echo.Context) error {
   conn, _, _, err := ws.UpgradeHTTP(c.Request(), c.Response())
   log.Println(conn.RemoteAddr().String(), "connected")
-  test := 0
   if err != nil {
     log.Println(err.Error())
   }
@@ -63,22 +64,16 @@ func Test(c echo.Context) error {
   for {
     msg, _, err := wsutil.ReadClientData(conn)
     if string(msg) == "hi" {
-      test++
-      log.Println(test)
-    }
-    if err != nil {
-      log.Println(err.Error())
-      return err
+      if err != nil {
+        log.Println(err.Error())
+        return err
+      }
     }
   }
 }
 
 func isServerMessage(msg string) bool {
   return strings.HasPrefix(msg, "msg:")
-}
-
-func (s *Server) broadcastMessage(roomId string, message string) {
-  // TODO: inform client about match made
 }
 
 // TODO: remove connection from pool, inform other client and delete room
@@ -91,4 +86,3 @@ func (s *Server) broadcastMessage(roomId string, message string) {
 // 5. inform client that match was made
 // 6. normal communication
 // 7. upon EOF, check if match was made, if yes remove from pool #1, or remove from pool #2 and inform other client
-// inform client about match made and other client disconnected
