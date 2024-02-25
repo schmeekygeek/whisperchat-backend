@@ -14,8 +14,8 @@ type Room struct {
 }
 
 type Message struct {
-  from    Client
-  body    string
+  From    Client `json:"from"`
+  Body    string `json:"body"`
 }
 
 type Client struct {

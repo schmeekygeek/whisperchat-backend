@@ -73,7 +73,6 @@ func (s *Server) match() error {
         c2.room = roomId
         room.c2 = *c2
         s.rooms[roomId] = *room
-
         s.broadcastMessage(roomId, MATCHEDMSG)
         delete(s.clients, k)
         delete(s.clients, k2)
@@ -84,16 +83,46 @@ func (s *Server) match() error {
   return nil
 }
 
-func (s *Server) broadcastMessage(roomId string, message string) {
-  room := s.rooms[roomId]
+func (s *Server) broadcastMessage(roomId, message string) {
+  if room, ok := s.rooms[roomId]; ok {
+    room.messages = append(room.messages, Message{
+    	Body: message,
+    })
+    s.rooms[roomId] = room
+    wsutil.WriteServerMessage(
+      room.c1.conn,
+      1,
+      []byte(message),
+    )
+    wsutil.WriteServerMessage(
+      room.c2.conn,
+      1,
+      []byte(message),
+    )
+  }
+}
+
+func (s *Server) sendClientMessage(from *Client, msg string) {
+  message := Message{
+  	From: *from,
+  	Body: msg,
+  }
+  jsn, err := json.Marshal(&message)
+  if err != nil {
+    log.Println(err.Error())
+    return
+  }
+  room := s.rooms[from.room]
+  room.messages = append(room.messages, message)
+  s.rooms[from.room] = room
   wsutil.WriteServerMessage(
     room.c1.conn,
     1,
-    []byte(message),
+    jsn,
   )
   wsutil.WriteServerMessage(
     room.c2.conn,
     1,
-    []byte(message),
+    jsn,
   )
 }

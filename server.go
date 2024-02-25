@@ -49,7 +49,7 @@ func (s *Server) Serve(c echo.Context) error {
         s.match()
       }
     } else {
-      s.broadcastMessage(client.room, string(msg))
+      s.sendClientMessage(client, string(msg))
     }
   }
 }
@@ -79,10 +79,10 @@ func isServerMessage(msg string) bool {
 // TODO: remove connection from pool, inform other client and delete room
 
 // TODO #2
-// 1. take connection, upgrade
-// 2. bind first message to client
-// 3. put clients in a separate room to wait for a match
-// 4. match top two after two clients connect
-// 5. inform client that match was made
-// 6. normal communication
+// x 1. take connection, upgrade
+// x 2. bind first message to client
+// x 3. put clients in a separate room to wait for a match
+// x 4. match top two after two clients connect
+// x 5. inform client that match was made
+// x 6. normal communication
 // 7. upon EOF, check if match was made, if yes remove from pool #1, or remove from pool #2 and inform other client
