@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -30,7 +32,11 @@ func (s *Server) Serve(c echo.Context) error {
     if err != nil {
       log.Println(err)
       if err == io.EOF {
-        // inform other client if matched
+        jsn, err := json.Marshal(*client)
+        if err != nil {
+          log.Println(err.Error())
+        }
+        s.broadcastMessage(client.room, fmt.Sprintf(DISCONNECTED, string(jsn)))
         return nil
       }
     }
@@ -76,8 +82,6 @@ func isServerMessage(msg string) bool {
   return strings.HasPrefix(msg, "msg:")
 }
 
-// TODO: remove connection from pool, inform other client and delete room
-
 // TODO #2
 // x 1. take connection, upgrade
 // x 2. bind first message to client
@@ -85,4 +89,4 @@ func isServerMessage(msg string) bool {
 // x 4. match top two after two clients connect
 // x 5. inform client that match was made
 // x 6. normal communication
-// 7. upon EOF, check if match was made, if yes remove from pool #1, or remove from pool #2 and inform other client
+// x 7. upon EOF, check if match was made, if yes remove from pool #1, or remove from pool #2 and inform other client
