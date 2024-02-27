@@ -36,14 +36,16 @@ func (s *Server) Serve(c echo.Context) error {
         if err != nil {
           log.Println(err.Error())
         }
-        if _, ok := s.clients[&client.conn]; !ok {
+        if v, ok := s.clients[&conn]; ok {
           log.Println("Unmatched")
-          delete(s.clients, &client.conn)
+          log.Println(v)
+          delete(s.clients, &conn)
           return nil
         }
         s.broadcastMessage(client.room, fmt.Sprintf(DISCONNECTED, string(jsn)))
-        // room := s.rooms[client.room]
-        // room.c2.conn.Close()
+        room := s.rooms[client.room]
+        room.c1.conn.Close()
+        room.c2.conn.Close()
         return nil
       }
     }
