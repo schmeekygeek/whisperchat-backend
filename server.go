@@ -43,9 +43,6 @@ func (s *Server) Serve(c echo.Context) error {
           return nil
         }
         s.broadcastMessage(client.room, fmt.Sprintf(DISCONNECTED, string(jsn)))
-        room := s.rooms[client.room]
-        room.c1.conn.Close()
-        room.c2.conn.Close()
         return nil
       }
     }

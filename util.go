@@ -89,15 +89,23 @@ func (s *Server) broadcastMessage(roomId, message string) {
     	Body: message,
     })
     s.rooms[roomId] = room
+    c1msg, err := json.Marshal(room.c2)
+    if err != nil {
+      log.Println(err.Error())
+    }
+    c2msg, err := json.Marshal(room.c1)
+    if err != nil {
+      log.Println(err.Error())
+    }
     wsutil.WriteServerMessage(
       room.c1.conn,
       1,
-      []byte(message),
+      append([]byte(message)[:], c1msg...),
     )
     wsutil.WriteServerMessage(
       room.c2.conn,
       1,
-      []byte(message),
+      append([]byte(message)[:], c2msg...),
     )
   }
 }
