@@ -73,7 +73,9 @@ func (s *Server) match() error {
         c2.room = roomId
         room.c2 = *c2
         s.rooms[roomId] = *room
-        s.broadcastMessage(roomId, MATCHEDMSG)
+        // manually send the matched message to both clients
+        s.sendClientDetails(*c1, *c2, MATCHEDMSG)
+        s.sendClientDetails(*c2, *c1, MATCHEDMSG)
         delete(s.clients, k)
         delete(s.clients, k2)
         return nil
@@ -83,54 +85,44 @@ func (s *Server) match() error {
   return nil
 }
 
-func (s *Server) broadcastMessage(roomId, message string) {
+func (s *Server) broadcastMessage(roomId string, msg Message) {
   if room, ok := s.rooms[roomId]; ok {
-    room.messages = append(room.messages, Message{
-    	Body: message,
-    })
+    room.messages = append(room.messages, msg)
     s.rooms[roomId] = room
-    c1msg, err := json.Marshal(room.c2)
-    if err != nil {
-      log.Println(err.Error())
-    }
-    c2msg, err := json.Marshal(room.c1)
+    jsn, err := json.Marshal(msg)
     if err != nil {
       log.Println(err.Error())
     }
     wsutil.WriteServerMessage(
       room.c1.conn,
       1,
-      append([]byte(message + " ")[:], c1msg...),
+      jsn,
     )
     wsutil.WriteServerMessage(
       room.c2.conn,
       1,
-      append([]byte(message + " ")[:], c2msg...),
+      jsn,
     )
   }
 }
 
-func (s *Server) sendClientMessage(from *Client, msg string) {
-  message := Message{
-  	From: *from,
-  	Body: msg,
-  }
-  jsn, err := json.Marshal(&message)
+func (s *Server) sendClientDetails(to, of Client, msgType MessageType) {
+  ofBodyJson, err := json.Marshal(&of)
   if err != nil {
     log.Println(err.Error())
-    return
   }
-  room := s.rooms[from.room]
-  room.messages = append(room.messages, message)
-  s.rooms[from.room] = room
+  msg := Message{
+  	Type: msgType,
+  	From: Client{},
+  	Body: string(ofBodyJson),
+  }
+  msgJson, err := json.Marshal(&msg)
+  if err != nil {
+    log.Println(err.Error())
+  }
   wsutil.WriteServerMessage(
-    room.c1.conn,
+    to.conn,
     1,
-    jsn,
-  )
-  wsutil.WriteServerMessage(
-    room.c2.conn,
-    1,
-    jsn,
+    msgJson,
   )
 }

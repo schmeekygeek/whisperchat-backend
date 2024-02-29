@@ -4,7 +4,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"strings"
 
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
@@ -49,13 +48,13 @@ func (s *Server) Serve(c echo.Context) error {
         log.Println(k, v)
       }
       log.Println("___________")
-    } else if isServerMessage(string(msg)) {
+    } else if isServerMessage(msg) {
       s.parseServerMessage(msg, client, &conn)
       if len(s.clients) > 1 {
         s.match()
       }
     } else {
-      s.sendClientMessage(client, string(msg))
+      s.broadcastMessage(client.room, string(msg))
     }
   }
 }
@@ -78,8 +77,8 @@ func Test(c echo.Context) error {
   }
 }
 
-func isServerMessage(msg string) bool {
-  return strings.HasPrefix(msg, "msg:")
+func isServerMessage(msg Message) bool {
+  return msg.Type == SRVRMSG
 }
 
 // TODO #2

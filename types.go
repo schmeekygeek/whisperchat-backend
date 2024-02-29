@@ -13,7 +13,10 @@ type Room struct {
   messages  []Message
 }
 
+type MessageType string
+
 type Message struct {
+  Type    MessageType `json:"type"`
   From    Client `json:"from"`
   Body    string `json:"body"`
 }
@@ -27,6 +30,7 @@ type Client struct {
 }
 
 const (
-  MATCHEDMSG = "msg:MATCHED"
-  DISCONNECTED = "msg:DISCONNECTED"
+  MATCHEDMSG = "matched"
+  BINDMSG = "bind"
+  DSCNCTMSG = "disconnected"
 )
