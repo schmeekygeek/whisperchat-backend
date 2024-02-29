@@ -100,12 +100,12 @@ func (s *Server) broadcastMessage(roomId, message string) {
     wsutil.WriteServerMessage(
       room.c1.conn,
       1,
-      append([]byte(message)[:], c1msg...),
+      append([]byte(message + " ")[:], c1msg...),
     )
     wsutil.WriteServerMessage(
       room.c2.conn,
       1,
-      append([]byte(message)[:], c2msg...),
+      append([]byte(message + " ")[:], c2msg...),
     )
   }
 }

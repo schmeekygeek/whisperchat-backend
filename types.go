@@ -28,5 +28,5 @@ type Client struct {
 
 const (
   MATCHEDMSG = "msg:MATCHED"
-  DISCONNECTED = "msg:DISCONNECTED %s"
+  DISCONNECTED = "msg:DISCONNECTED"
 )

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -32,17 +30,13 @@ func (s *Server) Serve(c echo.Context) error {
     if err != nil {
       log.Println(err)
       if err == io.EOF {
-        jsn, err := json.Marshal(*client)
-        if err != nil {
-          log.Println(err.Error())
-        }
         if v, ok := s.clients[&conn]; ok {
           log.Println("Unmatched")
           log.Println(v)
           delete(s.clients, &conn)
           return nil
         }
-        s.broadcastMessage(client.room, fmt.Sprintf(DISCONNECTED, string(jsn)))
+        s.broadcastMessage(client.room, DISCONNECTED)
         return nil
       }
     }
