@@ -33,4 +33,5 @@ const (
   MATCHEDMSG = "matched"
   BINDMSG = "bind"
   DSCNCTMSG = "disconnected"
+  CLNTMSG = "client"
 )

@@ -126,3 +126,7 @@ func (s *Server) sendClientDetails(to, of Client, msgType MessageType) {
     msgJson,
   )
 }
+
+func isServerMessage(msg Message) bool {
+  return msg.Type != CLNTMSG
+}
