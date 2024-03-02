@@ -77,9 +77,6 @@ func Test(c echo.Context) error {
   }
 }
 
-func isServerMessage(msg Message) bool {
-  return msg.Type == SRVRMSG
-}
 
 // TODO #2
 // x 1. take connection, upgrade
