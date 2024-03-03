@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
 	"log"
 	"net"
@@ -29,13 +30,19 @@ func (s *Server) Serve(c echo.Context) error {
     if err != nil {
       log.Println(err)
       if err == io.EOF {
-        if v, ok := s.clients[&conn]; ok {
-          log.Println("Unmatched")
-          log.Println(v)
+        if _, ok := s.clients[&conn]; ok {
           delete(s.clients, &conn)
           return nil
         }
-        s.broadcastMessage(client.room, DISCONNECTED)
+        jsn, err := json.Marshal(&client)
+        if err != nil {
+          log.Println(err.Error())
+        }
+        s.BroadcastMessage(client.room, Message{
+        	Type: DSCNCTMSG,
+        	From: Client{},
+        	Body: string(jsn), // the body of the client that disconnected
+        })
         return nil
       }
     }
@@ -48,35 +55,20 @@ func (s *Server) Serve(c echo.Context) error {
         log.Println(k, v)
       }
       log.Println("___________")
-    } else if isServerMessage(msg) {
-      s.parseServerMessage(msg, client, &conn)
+    } else if IsServerMessage(msg) {
+
+      s.ParseServerMessage(msg, client, &conn)
       if len(s.clients) > 1 {
-        s.match()
+        s.Match()
       }
     } else {
-      s.broadcastMessage(client.room, string(msg))
+      s.BroadcastMessage(
+        client.room,
+        Message{ Type: CLNTMSG, From: *client, Body: string(msg) },
+      )
     }
   }
 }
-
-func Test(c echo.Context) error {
-  conn, _, _, err := ws.UpgradeHTTP(c.Request(), c.Response())
-  log.Println(conn.RemoteAddr().String(), "connected")
-  if err != nil {
-    log.Println(err.Error())
-  }
-
-  for {
-    msg, _, err := wsutil.ReadClientData(conn)
-    if string(msg) == "hi" {
-      if err != nil {
-        log.Println(err.Error())
-        return err
-      }
-    }
-  }
-}
-
 
 // TODO #2
 // x 1. take connection, upgrade

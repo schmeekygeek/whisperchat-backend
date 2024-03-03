@@ -6,7 +6,6 @@ import (
 	"math"
 	"math/rand"
 	"net"
-	"strings"
 	"time"
 
 	"github.com/gobwas/ws/wsutil"
@@ -14,7 +13,7 @@ import (
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
 
-func RandSeq(n int) string {
+func randSeq(n int) string {
   r := rand.New(rand.NewSource(time.Now().UnixNano()))
   b := make([]rune, n)
   for i := range b {
@@ -23,7 +22,7 @@ func RandSeq(n int) string {
   return string(b)
 }
 
-func CalculateDistance(point1 Location, point2 Location) float64 {
+func calculateDistance(point1 Location, point2 Location) float64 {
   const R = 6371 //Radius of the earth in km
   dLat := deg2rad(float64(point1.Lat) - float64(point2.Lat))
   dLong := deg2rad(float64(point1.Long) - float64(point2.Long))
@@ -39,12 +38,16 @@ func deg2rad(deg float64) float64 {
   return deg * (math.Pi / 180)
 }
 
-func (s *Server) parseServerMessage(msg []byte, cl *Client, conn *net.Conn) {
-  message := msg[4:len(string(msg))]
-  if strings.HasPrefix(string(message), "BIND") {
-    bodyToParse := message[5:]
-    log.Println("Got body to parse:", string(bodyToParse))
-    err := json.Unmarshal(bodyToParse, cl)
+func (s *Server) ParseServerMessage(msg []byte, cl *Client, conn *net.Conn) {
+  message := Message{}
+  err := json.Unmarshal(msg, &message)
+  if err != nil {
+    log.Println(err.Error(), "sup")
+  }
+  if message.Type == BINDMSG {
+    bodyToParse := message.Body
+    log.Println("Got body to parse:", bodyToParse)
+    err := json.Unmarshal([]byte(bodyToParse), cl)
     if err != nil {
       log.Println(err.Error())
     }
@@ -52,17 +55,17 @@ func (s *Server) parseServerMessage(msg []byte, cl *Client, conn *net.Conn) {
   }
 }
 
-func (s *Server) match() error {
+func (s *Server) Match() error {
   for k, v := range s.clients {
     for k2, v2 := range s.clients {
       if k == k2 {
         continue
       }
-      distance := CalculateDistance(v.Location, v2.Location)
+      distance := calculateDistance(v.Location, v2.Location)
       if distance <= float64(v.Range) && distance <= float64(v2.Range) {
         // match dem
         room := new(Room)
-        roomId := RandSeq(5)
+        roomId := randSeq(5)
         c1 := s.clients[k]
         c1.conn = *k
         c1.room = roomId
@@ -74,8 +77,8 @@ func (s *Server) match() error {
         room.c2 = *c2
         s.rooms[roomId] = *room
         // manually send the matched message to both clients
-        s.sendClientDetails(*c1, *c2, MATCHEDMSG)
-        s.sendClientDetails(*c2, *c1, MATCHEDMSG)
+        s.SendClientDetails(*c1, *c2, MATCHEDMSG)
+        s.SendClientDetails(*c2, *c1, MATCHEDMSG)
         delete(s.clients, k)
         delete(s.clients, k2)
         return nil
@@ -85,7 +88,7 @@ func (s *Server) match() error {
   return nil
 }
 
-func (s *Server) broadcastMessage(roomId string, msg Message) {
+func (s *Server) BroadcastMessage(roomId string, msg Message) {
   if room, ok := s.rooms[roomId]; ok {
     room.messages = append(room.messages, msg)
     s.rooms[roomId] = room
@@ -106,7 +109,7 @@ func (s *Server) broadcastMessage(roomId string, msg Message) {
   }
 }
 
-func (s *Server) sendClientDetails(to, of Client, msgType MessageType) {
+func (s *Server) SendClientDetails(to, of Client, msgType MessageType) {
   ofBodyJson, err := json.Marshal(&of)
   if err != nil {
     log.Println(err.Error())
@@ -127,6 +130,11 @@ func (s *Server) sendClientDetails(to, of Client, msgType MessageType) {
   )
 }
 
-func isServerMessage(msg Message) bool {
+func IsServerMessage(jsn []byte) bool {
+  msg := Message{}
+  err := json.Unmarshal(jsn, &msg)
+  if err != nil {
+    return false
+  }
   return msg.Type != CLNTMSG
 }
