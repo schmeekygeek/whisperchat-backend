@@ -25,6 +25,7 @@ func (s *Server) Serve(c echo.Context) error {
   }
   log.Println(conn.RemoteAddr().String(), "connected")
   client := new(Client)
+  client.conn = conn
   for {
     msg, _, err := wsutil.ReadClientData(conn)
     if err != nil {
@@ -56,7 +57,6 @@ func (s *Server) Serve(c echo.Context) error {
       }
       log.Println("___________")
     } else if IsServerMessage(msg) {
-
       s.ParseServerMessage(msg, client, &conn)
       if len(s.clients) > 1 {
         s.Match()

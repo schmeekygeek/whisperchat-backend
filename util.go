@@ -45,12 +45,9 @@ func (s *Server) ParseServerMessage(msg []byte, cl *Client, conn *net.Conn) {
     log.Println(err.Error(), "sup")
   }
   if message.Type == BINDMSG {
-    bodyToParse := message.Body
-    log.Println("Got body to parse:", bodyToParse)
-    err := json.Unmarshal([]byte(bodyToParse), cl)
-    if err != nil {
-      log.Println(err.Error())
-    }
+    cl.Range = message.From.Range
+    cl.Location = message.From.Location
+    cl.Username = message.From.Username
     s.clients[conn] = cl
   }
 }
