@@ -107,14 +107,10 @@ func (s *Server) BroadcastMessage(roomId string, msg Message) {
 }
 
 func (s *Server) SendClientDetails(to, of Client, msgType MessageType) {
-  ofBodyJson, err := json.Marshal(&of)
-  if err != nil {
-    log.Println(err.Error())
-  }
   msg := Message{
   	Type: msgType,
-  	From: Client{},
-  	Body: string(ofBodyJson),
+  	From: of,
+  	Body: "",
   }
   msgJson, err := json.Marshal(&msg)
   if err != nil {
