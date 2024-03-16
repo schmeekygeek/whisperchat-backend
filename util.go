@@ -74,8 +74,8 @@ func (s *Server) Match() error {
         room.c2 = *c2
         s.rooms[roomId] = *room
         // manually send the matched message to both clients
-        s.SendClientDetails(*c1, *c2, MATCHEDMSG)
-        s.SendClientDetails(*c2, *c1, MATCHEDMSG)
+        s.SendClientDetails(*c1, *c2, CNNCTMSG)
+        s.SendClientDetails(*c2, *c1, CNNCTMSG)
         delete(s.clients, k)
         delete(s.clients, k2)
         return nil

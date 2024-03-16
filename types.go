@@ -30,7 +30,7 @@ type Client struct {
 }
 
 const (
-  MATCHEDMSG = "matched"
+  CNNCTMSG = "connected"
   BINDMSG = "bind"
   DSCNCTMSG = "disconnected"
   CLNTMSG = "client"
