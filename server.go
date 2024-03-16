@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"io"
 	"log"
 	"net"
@@ -35,14 +34,10 @@ func (s *Server) Serve(c echo.Context) error {
           delete(s.clients, &conn)
           return nil
         }
-        jsn, err := json.Marshal(&client)
-        if err != nil {
-          log.Println(err.Error())
-        }
         s.BroadcastMessage(client.room, Message{
         	Type: DSCNCTMSG,
-        	From: Client{},
-        	Body: string(jsn), // the body of the client that disconnected
+        	From: *client,
+        	Body: "",
         })
         return nil
       }
