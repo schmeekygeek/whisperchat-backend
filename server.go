@@ -42,7 +42,7 @@ func (s *Server) Serve(c echo.Context) error {
         return nil
       }
     }
-    if string(msg) == "hi" {
+    if string(msg) == "msg:hi" {
       // debug
       log.Println("\nRooms:", s.rooms)
       log.Println("___________")
