@@ -126,7 +126,9 @@ func (s *Server) SendClientDetails(to, of Client, msgType MessageType) {
 func IsServerMessage(jsn []byte) bool {
   msg := Message{}
   err := json.Unmarshal(jsn, &msg)
+  log.Println(msg)
   if err != nil {
+    log.Println(err)
     return false
   }
   return msg.Type != CLNTMSG

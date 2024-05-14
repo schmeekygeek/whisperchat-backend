@@ -1,0 +1,11 @@
+{
+  "type": "bind",
+  "from": {
+    "username": "sam2",
+    "location": {
+      "lat": 1,
+      "long": 0
+    },
+    "range": 20
+  }
+}
